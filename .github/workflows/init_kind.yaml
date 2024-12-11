@@ -1,0 +1,120 @@
+name: Install Kind Cluster on EC2
+run-name: Install Kind on ${{ inputs.EC2_IP }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      EC2_IP:
+        description: "The IP address of the Kind EC2 instance"
+        required: true
+
+jobs:
+  install-kind:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+
+    - name: Install Prerequisites
+      uses: appleboy/ssh-action@v1.2.0
+      with:
+        host: ${{ inputs.EC2_IP }}
+        username: ec2-user
+        key: ${{ secrets.SSH_KEY }}
+        port: 22
+        script: |
+          sudo yum update -y
+
+          # Install Docker
+          sudo yum install -y docker
+          sudo systemctl start docker
+          sudo systemctl enable docker
+          sudo usermod -aG docker $USER
+          newgrp docker
+          sudo chmod 666 /var/run/docker.sock
+
+          # Install Kind
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
+
+          # Install kubectl
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/kubectl
+
+          # Verify kubectl installation
+          kubectl version --client
+
+          # Install Helm
+          curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+
+          # Verify helm installation
+          helm version
+
+
+    - name: Install Kind on EC2
+      uses: appleboy/ssh-action@v1.2.0
+      with:
+        host: ${{ inputs.EC2_IP }}
+        username: ec2-user
+        key: ${{ secrets.SSH_KEY }}
+        port: 22
+        script: |
+          # Create a Kind cluster
+          kind create cluster --name kind-cluster --config - <<EOF
+          kind: Cluster
+          apiVersion: kind.x-k8s.io/v1alpha4
+          nodes:
+          - role: control-plane
+            extraPortMappings:
+            - containerPort: 80
+              hostPort: 80
+            - containerPort: 30080
+              hostPort: 30080
+              protocol: TCP
+          EOF
+
+          # Verify cluster
+          kubectl cluster-info --context kind-kind-cluster
+
+
+    - name: Deploy Cert Manager
+      uses: appleboy/ssh-action@v1.2.0
+      with:
+        host: ${{ inputs.EC2_IP }}
+        username: ec2-user
+        key: ${{ secrets.SSH_KEY }}
+        port: 22
+        script: |
+          kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.2/cert-manager.yaml
+
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+
+    - name: Deploy ARC Runner
+      uses: appleboy/ssh-action@v1.2.0
+      with:
+        host: ${{ inputs.EC2_IP }}
+        username: ec2-user
+        key: ${{ secrets.SSH_KEY }}
+        port: 22
+        script: |
+          helm repo add actions-runner-controller https://actions-runner-controller.github.io/actions-runner-controller
+
+          NAMESPACE="arc-system"
+          helm install actions-runner-controller \
+            --namespace "$NAMESPACE" \
+            --create-namespace \
+            --set=authSecret.create=true \
+            --set=authSecret.github_token="${{ secrets.GT_PAT }}" \
+            actions-runner-controller/actions-runner-controller
+
+          kubectl apply -f templates/runnerdeployment.yaml
+
+          # Verify runners installed
+          kubectl get runners
+          kubectl get pods

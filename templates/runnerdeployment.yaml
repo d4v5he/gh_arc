@@ -7,3 +7,5 @@ spec:
   template:
     spec:
       repository: https://github.com/d4v5he/gh_arc.git
+      labels:
+        - arc_runner

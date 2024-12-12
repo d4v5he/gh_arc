@@ -71,7 +71,7 @@ jobs:
       - name: Upload Plan Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: terraform-plan
+          name: tfplan
           path: infra/tfplan
 
   manual-approval:

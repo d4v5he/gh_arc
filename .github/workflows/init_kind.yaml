@@ -16,7 +16,7 @@ jobs:
     - name: Checkout Repo
       uses: actions/checkout@v3
 
-    - name: Install Prerequisites
+    - name: Install Kind on EC2
       uses: appleboy/ssh-action@v1.2.0
       with:
         host: ${{ inputs.EC2_IP }}
@@ -47,21 +47,6 @@ jobs:
           # Verify kubectl installation
           kubectl version --client
 
-          # Install Helm
-          curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
-
-          # Verify helm installation
-          helm version
-
-
-    - name: Install Kind on EC2
-      uses: appleboy/ssh-action@v1.2.0
-      with:
-        host: ${{ inputs.EC2_IP }}
-        username: ec2-user
-        key: ${{ secrets.SSH_KEY }}
-        port: 22
-        script: |
           # Create a Kind cluster
           kind create cluster --name kind-cluster --config - <<EOF
           kind: Cluster
@@ -71,72 +56,10 @@ jobs:
             extraPortMappings:
             - containerPort: 80
               hostPort: 80
-            - containerPort: 443
-              hostPort: 443
-              protocol: TCP
-            - containerPort: 8443
-              hostPort: 8443
-              protocol: TCP
-            - containerPort: 9402
-              hostPort: 9402
+            - containerPort: 30080
+              hostPort: 30080
               protocol: TCP
           EOF
 
           # Verify cluster
           kubectl cluster-info --context kind-kind-cluster
-
-          rm -rf repo
-
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Copy Repo to Kind EC2
-      run: |
-        # Save the SSH private key to a file
-        echo "${{ secrets.SSH_KEY }}" > key.pem
-        chmod 400 key.pem
-
-        # Use rsync to copy the repository, excluding key.pem
-        rsync -avz -e "ssh -i key.pem -o StrictHostKeyChecking=no" --exclude 'key.pem' ./ ec2-user@${{ inputs.EC2_IP }}:~/repo
-
-
-    - name: Deploy Cert Manager
-      uses: appleboy/ssh-action@v1.2.0
-      with:
-        host: ${{ inputs.EC2_IP }}
-        username: ec2-user
-        key: ${{ secrets.SSH_KEY }}
-        port: 22
-        script: |
-          kubectl create namespace arc-system || true
-
-          kubectl delete clusterrole actions-runner-controller-proxy
-          kubectl delete clusterrolebinding actions-runner-controller-proxy
-
-          kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.2/cert-manager.yaml
-          kubectl apply -f repo/templates/clusterissuer.yaml
-          kubectl apply -f repo/templates/certificate.yaml
-
-
-    - name: Deploy ARC Runner
-      uses: appleboy/ssh-action@v1.2.0
-      with:
-        host: ${{ inputs.EC2_IP }}
-        username: ec2-user
-        key: ${{ secrets.SSH_KEY }}
-        port: 22
-        script: |
-          helm repo add actions-runner-controller https://actions-runner-controller.github.io/actions-runner-controller
-
-          helm uninstall actions-runner-controller -n arc-system
-
-          helm upgrade --install --namespace arc-system --create-namespace\
-            --set=authSecret.create=true\
-            --set=authSecret.github_token="${{ secrets.GT_PAT }}"\
-            --wait actions-runner-controller actions-runner-controller/actions-runner-controller
-
-          kubectl apply -f repo/templates/runnerdeployment.yaml
-
-          # Verify runners installed
-          kubectl get runners
-          kubectl get pods

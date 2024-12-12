@@ -1,9 +1,0 @@
-apiVersion: actions.summerwind.dev/v1alpha1
-kind: RunnerDeployment
-metadata:
-  name: cluster-runnerdeploy
-spec:
-  replicas: 1
-  template:
-    spec:
-      repository: d4v5he/gh_arc

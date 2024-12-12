@@ -1,0 +1,13 @@
+mongo:
+  image: mongo
+  replicaCount: 1
+  username: username
+  password: password
+  servicePort: 27017
+
+mongoExpress:
+  image: mongo-express
+  servicePort: 8081
+  nodePort: 30001
+
+mongodbUrl: "mongodb://mongodb-service:27017"

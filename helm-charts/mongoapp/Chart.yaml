@@ -1,0 +1,4 @@
+apiVersion: v2
+name: mongo-helm-chart
+description: A Helm chart for deploying MongoDB and Mongo Express
+version: 1.0.0

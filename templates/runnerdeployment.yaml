@@ -6,4 +6,4 @@ spec:
   replicas: 1
   template:
     spec:
-      repository: https://github.com/d4v5he/gh_arc.git
+      repository: d4v5he/gh_arc

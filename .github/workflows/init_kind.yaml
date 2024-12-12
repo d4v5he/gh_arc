@@ -79,6 +79,9 @@ jobs:
           # Verify cluster
           kubectl cluster-info --context kind-kind-cluster
 
+    - name: Checkout code
+      uses: actions/checkout@v4
+
 
     - name: Deploy Cert Manager
       uses: appleboy/ssh-action@v1.2.0
@@ -92,10 +95,6 @@ jobs:
 
           kubectl apply -f templates/clusterissuer.yaml
           kubectl apply -f templates/certificate.yaml
-
-
-    - name: Checkout code
-      uses: actions/checkout@v4
 
 
     - name: Deploy ARC Runner

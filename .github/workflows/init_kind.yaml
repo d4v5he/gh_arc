@@ -92,7 +92,7 @@ jobs:
         port: 22
         script: |
           kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.2/cert-manager.yaml
-
+          ls -l 
           kubectl apply -f templates/clusterissuer.yaml
           kubectl apply -f templates/certificate.yaml
 

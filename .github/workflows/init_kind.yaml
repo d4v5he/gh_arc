@@ -77,6 +77,9 @@ jobs:
             - containerPort: 8443
               hostPort: 8443
               protocol: TCP
+            - containerPort: 9402
+              hostPort: 9402
+              protocol: TCP
           EOF
 
           # Verify cluster
@@ -106,7 +109,7 @@ jobs:
         port: 22
         script: |
           kubectl create namespace arc-system || true
-          
+
           kubectl delete clusterrole actions-runner-controller-proxy
           kubectl delete clusterrolebinding actions-runner-controller-proxy
 

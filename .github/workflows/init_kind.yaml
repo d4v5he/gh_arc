@@ -105,6 +105,8 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         port: 22
         script: |
+          kubectl create namespace arc-system || true
+          
           kubectl delete clusterrole actions-runner-controller-proxy
           kubectl delete clusterrolebinding actions-runner-controller-proxy
 
@@ -121,8 +123,6 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         port: 22
         script: |
-          kubectl create namespace arc-system || true
-          
           helm repo add actions-runner-controller https://actions-runner-controller.github.io/actions-runner-controller
 
           helm uninstall actions-runner-controller -n arc-system

@@ -82,6 +82,7 @@ jobs:
           # Verify cluster
           kubectl cluster-info --context kind-kind-cluster
 
+          rm -rf repo
 
     - name: Checkout code
       uses: actions/checkout@v4

@@ -102,9 +102,8 @@ jobs:
         port: 22
         script: |
           kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.2/cert-manager.yaml
-          pwd
-          kubectl apply -f templates/clusterissuer.yaml
-          kubectl apply -f templates/certificate.yaml
+          kubectl apply -f repo/templates/clusterissuer.yaml
+          kubectl apply -f repo/templates/certificate.yaml
 
 
     - name: Deploy ARC Runner
@@ -122,7 +121,7 @@ jobs:
             --set=authSecret.github_token="${{ secrets.GT_PAT }}"\
             --wait actions-runner-controller actions-runner-controller/actions-runner-controller
 
-          kubectl apply -f templates/runnerdeployment.yaml
+          kubectl apply -f repo/templates/runnerdeployment.yaml
 
           # Verify runners installed
           kubectl get runners

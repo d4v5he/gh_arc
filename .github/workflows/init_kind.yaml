@@ -79,8 +79,18 @@ jobs:
           # Verify cluster
           kubectl cluster-info --context kind-kind-cluster
 
+
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Copy Repo to Kind EC2
+      run: |
+        # Save the SSH private key to a file
+        echo "${{ secrets.SSH_KEY }}" > key.pem
+        chmod 400 key.pem
+
+        # Use rsync to copy the repository, excluding key.pem
+        rsync -avz -e "ssh -i key.pem -o StrictHostKeyChecking=no" --exclude 'key.pem' ./ ec2-user@${{ inputs.EC2_IP }}:~/repo
 
 
     - name: Deploy Cert Manager

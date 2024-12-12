@@ -105,13 +105,10 @@ jobs:
         script: |
           helm repo add actions-runner-controller https://actions-runner-controller.github.io/actions-runner-controller
 
-          NAMESPACE="arc-system"
-          helm install actions-runner-controller \
-            --namespace "$NAMESPACE" \
-            --create-namespace \
-            --set=authSecret.create=true \
-            --set=authSecret.github_token="${{ secrets.GT_PAT }}" \
-            actions-runner-controller/actions-runner-controller
+          helm upgrade --install --namespace actions-runner-system --create-namespace\
+            --set=authSecret.create=true\
+            --set=authSecret.github_token="${{ secrets.GT_PAT }}"\
+            --wait actions-runner-controller actions-runner-controller/actions-runner-controller
 
           kubectl apply -f templates/runnerdeployment.yaml
 

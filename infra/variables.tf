@@ -16,7 +16,9 @@ variable "sg_map" {
         "GitHub_Runner" = {
             extra_ports = [ 443 ]
         },
-        "K8S_Cluster" = {}
+        "K8S_Cluster" = {
+          extra_ports = [ 30080 ]
+        }
     }
 }
 

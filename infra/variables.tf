@@ -16,27 +16,26 @@ variable "sg_map" {
         "GitHub_Runner" = {
             extra_ports = [ 443 ]
         },
-        "K8S_Cluster" = {
-          extra_ports = [ 443 ]
-        }
+        "K8S_Cluster" = {}
     }
 }
 
 variable "ec2_map" {
   default = {
         "GitHub_Runner" = {}
-        #   user_data = <<-EOF
-        #     #!/bin/bash
-        #     sudo yum update -y
-        #     sudo yum install -y libicu
-        #     mkdir actions-runner && cd actions-runner
-        #     curl -o actions-runner-linux-x64-2.321.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.321.0/actions-runner-linux-x64-2.321.0.tar.gz
-        #     tar xzf ./actions-runner-linux-x64-2.321.0.tar.gz
-        #     ./config.sh --url https://github.com/d4v5he/gh_arc --token BH74YWJSS3MLW5CZ47S5X6LHLN5R4 --unattended --replace
-        #     sudo ./svc.sh install
-        #     sudo ./svc.sh start
-        #   EOF
-        # },
         "K8S_Cluster" = {}
     }
 }
+
+
+#   user_data = <<-EOF
+#     #!/bin/bash
+#     sudo yum update -y
+#     sudo yum install -y libicu
+#     mkdir actions-runner && cd actions-runner
+#     curl -o actions-runner-linux-x64-2.321.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.321.0/actions-runner-linux-x64-2.321.0.tar.gz
+#     tar xzf ./actions-runner-linux-x64-2.321.0.tar.gz
+#     ./config.sh --url https://github.com/d4v5he/gh_arc --token BH74YWJSS3MLW5CZ47S5X6LHLN5R4 --unattended --replace
+#     sudo ./svc.sh install
+#     sudo ./svc.sh start
+#   EOF

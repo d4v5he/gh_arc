@@ -18,7 +18,7 @@ argocd login <ARGOCD_SERVER> --username admin --password <PASSWORD>
 
 argocd account update-password
 
-
+-----------------
 apiVersion: v1
 kind: Service
 metadata:

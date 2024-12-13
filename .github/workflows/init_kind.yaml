@@ -61,6 +61,12 @@ jobs:
             - containerPort: 30080
               hostPort: 30080
               protocol: TCP
+            - containerPort: 30081
+              hostPort: 30081
+              protocol: TCP
+            - containerPort: 30082
+              hostPort: 30082
+              protocol: TCP
           EOF
 
           # Verify cluster

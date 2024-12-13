@@ -6,6 +6,10 @@ resource "aws_instance" "main" {
   key_name               = var.ssh_key_name
   user_data              = var.user_data
 
+  root_block_device {
+    volume_size = 30
+    volume_type = "gp2"
+  }
   tags = {
     Name = var.name
   }
